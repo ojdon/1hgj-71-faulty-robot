@@ -20,8 +20,10 @@ damaged = false
 status = 7
 batteries = {}
 holes = {}
-batterytimer = 10 * 30
-holetimer = 5 * 30			
+batterytimer = 5 * 30
+holetimer = 3 * 30		
+
+spawntimer = 3 * 30	
 
 -- game loop
 function _init()
@@ -78,6 +80,7 @@ function spawnhole()
 	hole.y = abs(flr(rnd(90))) + 30
 	hole.w = 15
 	hole.h = 15
+	hole.spawntimer = 1 * 30
 	if(iscolliding(hole,			 player)) then
 		spawnhole()
 	else
@@ -101,13 +104,13 @@ function gameupdate()
 	
 	if(batterytimer < 0) then
 		add(batteries, spawnbattery())
-		batterytimer = 10 * 30
+		batterytimer = 5 * 30
 		lives -= 10
 	end
 	
 	if(holetimer < 0) then
 		add(holes, spawnhole())
-		holetimer = 5 * 30
+		holetimer = 3 * 30
 	end
 	
 	if(btn(0))then
@@ -137,7 +140,9 @@ function gameupdate()
 	end
 	
 	for hole in all(holes) do
-		if(iscolliding(player, hole)) then
+		hole.spawntimer -= 1
+		
+		if(iscolliding(player, hole) and hole.spawntimer < 0) then
 				player.x = 200
 				scene = 2
 		end
@@ -146,9 +151,10 @@ function gameupdate()
 	for battery in all(batteries) do
 		if(iscolliding(player, battery)) then
 				lives += 10
+				score += 1
 				battery.x = abs(flr(rnd(110))) + 10
 				battery.y = abs(flr(rnd(90))) + 30
-	
+				add(holes, spawnhole())
 		end
 	end
 	
